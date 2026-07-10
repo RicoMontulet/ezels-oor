@@ -1,0 +1,17 @@
+{
+  "durationMilliseconds": 6815,
+  "combinedPhrases": [
+    {
+      "text": "THE INMATES BEING REMOVED AT THE APPOINTED HOUR A FEW CANNON BALLS WERE FIRED THROUGH THE STONE WALLS"
+    }
+  ],
+  "phrases": [
+    {
+      "offsetMilliseconds": 0,
+      "durationMilliseconds": 6815,
+      "text": "THE INMATES BEING REMOVED AT THE APPOINTED HOUR A FEW CANNON BALLS WERE FIRED THROUGH THE STONE WALLS",
+      "locale": "en-US",
+      "speaker": 1
+    }
+  ]
+}

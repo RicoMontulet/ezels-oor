@@ -1,0 +1,31 @@
+{
+  "durationMilliseconds": 17710,
+  "combinedPhrases": [
+    {
+      "text": "THE DELAWARES ARE CHILDREN OF THE TORTOISE AND THEY OUTSTRIP THE DEER SATURDAY AUGUST FIFTEENTH THE SEA UNBROKEN ALL ROUND NO LAND IN SIGHT THE INMATES BEING REMOVED AT THE APPOINTED HOUR A FEW CANNON BALLS WERE FIRED THROUGH THE STONE WALLS"
+    }
+  ],
+  "phrases": [
+    {
+      "offsetMilliseconds": 0,
+      "durationMilliseconds": 3855,
+      "text": "THE DELAWARES ARE CHILDREN OF THE TORTOISE AND THEY OUTSTRIP THE DEER",
+      "locale": "en-US",
+      "speaker": 1
+    },
+    {
+      "offsetMilliseconds": 3855,
+      "durationMilliseconds": 7040,
+      "text": "SATURDAY AUGUST FIFTEENTH THE SEA UNBROKEN ALL ROUND NO LAND IN SIGHT",
+      "locale": "en-US",
+      "speaker": 2
+    },
+    {
+      "offsetMilliseconds": 10895,
+      "durationMilliseconds": 6815,
+      "text": "THE INMATES BEING REMOVED AT THE APPOINTED HOUR A FEW CANNON BALLS WERE FIRED THROUGH THE STONE WALLS",
+      "locale": "en-US",
+      "speaker": 3
+    }
+  ]
+}
