@@ -110,8 +110,8 @@ Maak een eigen branch met de teamnaam. Werk niet rechtstreeks op `main`:
 
 
 ```bash
-git switch -c team/<teamnaam>
-git push -u origin team/<teamnaam>
+git switch -c <teamnaam>
+git push -u origin <teamnaam>
 ```
 
 
