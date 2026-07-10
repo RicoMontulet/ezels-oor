@@ -13,6 +13,9 @@
 *.ogg
 *.wav
 
+# Alleen expliciet beoordeelde, gelicentieerde testsamples mogen mee
+!samples/test-data/*.flac
+
 # Gegenereerde uitvoer
 dist/
 build/
