@@ -76,6 +76,60 @@ De mappenstructuur is een richtlijn. Teams mogen hiervan afwijken wanneer dit de
 
 * Bespreek wijzigingen aan gedeelde contracten met de betrokken teams.
 
+## Azure API's
+
+De configuratie in `.env.example` bevat drie afzonderlijke Azure-resources. Maak lokaal een `.env` op basis van dit bestand en vul alleen de drie API-sleutels in. Commit `.env` nooit.
+
+```bash
+cp .env.example .env
+```
+
+Laad de variabelen voor een lokale shell als volgt:
+
+```bash
+set -a
+. ./.env
+set +a
+```
+
+### Speech: audio naar transcript en sprekers
+
+`SPEECH_ENDPOINT`, `SPEECH_REGION` en `SPEECH_API_KEY` horen bij Azure Speech. Voor deze demo is de synchronische Fast Transcription API gebruikt:
+
+```text
+POST $SPEECH_ENDPOINT/speechtotext/transcriptions:transcribe?api-version=2025-10-15
+```
+
+Stuur een `multipart/form-data`-request met een `audio`-bestand en een JSON-veld `definition`. Gebruik `locales` voor de spreektaal en zet `diarization.enabled` op `true` wanneer sprekerwissels nodig zijn. De response bevat:
+
+* `combinedPhrases`: volledige leesbare transcriptie;
+* `phrases`: segmenten met `offsetMilliseconds`, `durationMilliseconds`, tekst, confidence en een `speaker`;
+* `words`: woordtijden binnen ieder segment.
+
+Sprekerlabels zijn alleen stabiel binnen één request. Bewaar daarom eigen deelnemersnamen los van Azure-labels. Dit endpoint is basis voor opname, transcriptie en diarization in EzelsOor.
+
+### Language: transcript analyseren
+
+`LANGUAGE_ENDPOINT` en `LANGUAGE_API_KEY` horen bij Azure AI Language. Geef hier tekst door nadat Speech een transcript heeft gemaakt:
+
+```text
+POST $LANGUAGE_ENDPOINT/language/:analyze-text?api-version=2024-11-01
+```
+
+De body kiest één analyse met `kind`. Getest voor dit project: `SentimentAnalysis` (document- en zinsentiment, optioneel opinion mining) en `KeyPhraseExtraction`. De resource ondersteunt, afhankelijk van ingeschakelde Azure-functies en regio, ook onder meer taaldetectie, named-entity recognition, PII-detectie, extractive/abstractive summarization en Conversational Language Understanding. Gebruik dit endpoint voor samenvatting-voorbewerking, actiepuntdetectie en privacycontroles; valideer beschikbaarheid van niet-geteste functies eerst in Azure.
+
+### Translator: transcript vertalen
+
+`TRANSLATOR_ENDPOINT` en `TRANSLATOR_API_KEY` horen bij Azure AI Translator. Stuur een JSON-array met één of meer objecten met `Text` naar:
+
+```text
+POST $TRANSLATOR_ENDPOINT/translate?api-version=3.0&from=en&to=nl
+```
+
+Gebruik headers `Ocp-Apim-Subscription-Key`, `Ocp-Apim-Subscription-Region` (voor deze resource: `westeurope`) en `Content-Type: application/json; charset=utf-8`. De response bevat per invoertekst een `translations`-array met `text` en doelcode `to`. Vertaal pas na transcriptie; timings en speakerlabels blijven in eigen applicatiedata naast vertaalde tekst staan.
+
+Concrete requests, verwachte verschillen en vastgelegde testresponses staan in [`samples/test-data/README.md`](samples/test-data/README.md).
+
 
 
 ## Samenwerken

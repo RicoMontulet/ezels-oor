@@ -1,0 +1,741 @@
+{
+  "generatedAt": "2026-07-13",
+  "note": "Responses captured from configured Azure resources. Public LibriSpeech fixtures only; no credentials included.",
+  "speechFastTranscription": {
+    "apiVersion": "2025-10-15",
+    "request": {
+      "locales": [
+        "en-US"
+      ],
+      "diarization": {
+        "enabled": true,
+        "maxSpeakers": 3
+      }
+    },
+    "responses": {
+      "1320-122617-0022.flac": {
+        "durationMilliseconds": 3855,
+        "combinedPhrases": [
+          {
+            "text": "The Delawares are children of the tortoise, and they outstrip the deer."
+          }
+        ],
+        "phrases": [
+          {
+            "speaker": 1,
+            "offsetMilliseconds": 160,
+            "durationMilliseconds": 3200,
+            "text": "The Delawares are children of the tortoise, and they outstrip the deer.",
+            "words": [
+              {
+                "text": "The",
+                "offsetMilliseconds": 160,
+                "durationMilliseconds": 160
+              },
+              {
+                "text": "Delawares",
+                "offsetMilliseconds": 320,
+                "durationMilliseconds": 560
+              },
+              {
+                "text": "are",
+                "offsetMilliseconds": 880,
+                "durationMilliseconds": 80
+              },
+              {
+                "text": "children",
+                "offsetMilliseconds": 960,
+                "durationMilliseconds": 400
+              },
+              {
+                "text": "of",
+                "offsetMilliseconds": 1360,
+                "durationMilliseconds": 80
+              },
+              {
+                "text": "the",
+                "offsetMilliseconds": 1440,
+                "durationMilliseconds": 120
+              },
+              {
+                "text": "tortoise,",
+                "offsetMilliseconds": 1560,
+                "durationMilliseconds": 480
+              },
+              {
+                "text": "and",
+                "offsetMilliseconds": 2040,
+                "durationMilliseconds": 120
+              },
+              {
+                "text": "they",
+                "offsetMilliseconds": 2160,
+                "durationMilliseconds": 80
+              },
+              {
+                "text": "outstrip",
+                "offsetMilliseconds": 2240,
+                "durationMilliseconds": 560
+              },
+              {
+                "text": "the",
+                "offsetMilliseconds": 2800,
+                "durationMilliseconds": 80
+              },
+              {
+                "text": "deer.",
+                "offsetMilliseconds": 2880,
+                "durationMilliseconds": 480
+              }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9331452
+          }
+        ]
+      },
+      "260-123286-0000.flac": {
+        "durationMilliseconds": 7040,
+        "combinedPhrases": [
+          {
+            "text": "Saturday, August 15th. The sea unbroken all round. No land insight."
+          }
+        ],
+        "phrases": [
+          {
+            "speaker": 1,
+            "offsetMilliseconds": 560,
+            "durationMilliseconds": 1840,
+            "text": "Saturday, August 15th.",
+            "words": [
+              {
+                "text": "Saturday,",
+                "offsetMilliseconds": 560,
+                "durationMilliseconds": 640
+              },
+              {
+                "text": "August",
+                "offsetMilliseconds": 1440,
+                "durationMilliseconds": 400
+              },
+              {
+                "text": "15th.",
+                "offsetMilliseconds": 1840,
+                "durationMilliseconds": 560
+              }
+            ],
+            "locale": "en-US",
+            "confidence": 0.8593089
+          },
+          {
+            "speaker": 1,
+            "offsetMilliseconds": 2400,
+            "durationMilliseconds": 2840,
+            "text": "The sea unbroken all round.",
+            "words": [
+              {
+                "text": "The",
+                "offsetMilliseconds": 2400,
+                "durationMilliseconds": 80
+              },
+              {
+                "text": "sea",
+                "offsetMilliseconds": 3480,
+                "durationMilliseconds": 480
+              },
+              {
+                "text": "unbroken",
+                "offsetMilliseconds": 3960,
+                "durationMilliseconds": 520
+              },
+              {
+                "text": "all",
+                "offsetMilliseconds": 4480,
+                "durationMilliseconds": 240
+              },
+              {
+                "text": "round.",
+                "offsetMilliseconds": 4720,
+                "durationMilliseconds": 520
+              }
+            ],
+            "locale": "en-US",
+            "confidence": 0.8593089
+          },
+          {
+            "speaker": 1,
+            "offsetMilliseconds": 5760,
+            "durationMilliseconds": 1120,
+            "text": "No land insight.",
+            "words": [
+              {
+                "text": "No",
+                "offsetMilliseconds": 5760,
+                "durationMilliseconds": 160
+              },
+              {
+                "text": "land",
+                "offsetMilliseconds": 5920,
+                "durationMilliseconds": 360
+              },
+              {
+                "text": "insight.",
+                "offsetMilliseconds": 6280,
+                "durationMilliseconds": 600
+              }
+            ],
+            "locale": "en-US",
+            "confidence": 0.8593089
+          }
+        ]
+      },
+      "7729-102255-0039.flac": {
+        "durationMilliseconds": 6815,
+        "combinedPhrases": [
+          {
+            "text": "The inmates being removed, at the appointed hour a few cannonballs were fired through the stone walls."
+          }
+        ],
+        "phrases": [
+          {
+            "speaker": 1,
+            "offsetMilliseconds": 400,
+            "durationMilliseconds": 6240,
+            "text": "The inmates being removed, at the appointed hour a few cannonballs were fired through the stone walls.",
+            "words": [
+              {
+                "text": "The",
+                "offsetMilliseconds": 400,
+                "durationMilliseconds": 120
+              },
+              {
+                "text": "inmates",
+                "offsetMilliseconds": 520,
+                "durationMilliseconds": 520
+              },
+              {
+                "text": "being",
+                "offsetMilliseconds": 1040,
+                "durationMilliseconds": 320
+              },
+              {
+                "text": "removed,",
+                "offsetMilliseconds": 1360,
+                "durationMilliseconds": 640
+              },
+              {
+                "text": "at",
+                "offsetMilliseconds": 2400,
+                "durationMilliseconds": 160
+              },
+              {
+                "text": "the",
+                "offsetMilliseconds": 2560,
+                "durationMilliseconds": 120
+              },
+              {
+                "text": "appointed",
+                "offsetMilliseconds": 2680,
+                "durationMilliseconds": 520
+              },
+              {
+                "text": "hour",
+                "offsetMilliseconds": 3200,
+                "durationMilliseconds": 560
+              },
+              {
+                "text": "a",
+                "offsetMilliseconds": 3880,
+                "durationMilliseconds": 40
+              },
+              {
+                "text": "few",
+                "offsetMilliseconds": 3920,
+                "durationMilliseconds": 240
+              },
+              {
+                "text": "cannonballs",
+                "offsetMilliseconds": 4160,
+                "durationMilliseconds": 800
+              },
+              {
+                "text": "were",
+                "offsetMilliseconds": 4960,
+                "durationMilliseconds": 160
+              },
+              {
+                "text": "fired",
+                "offsetMilliseconds": 5120,
+                "durationMilliseconds": 400
+              },
+              {
+                "text": "through",
+                "offsetMilliseconds": 5520,
+                "durationMilliseconds": 160
+              },
+              {
+                "text": "the",
+                "offsetMilliseconds": 5680,
+                "durationMilliseconds": 80
+              },
+              {
+                "text": "stone",
+                "offsetMilliseconds": 5760,
+                "durationMilliseconds": 320
+              },
+              {
+                "text": "walls.",
+                "offsetMilliseconds": 6080,
+                "durationMilliseconds": 560
+              }
+            ],
+            "locale": "en-US",
+            "confidence": 0.87473196
+          }
+        ]
+      },
+      "multi-speaker-sequence.flac": {
+        "durationMilliseconds": 17710,
+        "combinedPhrases": [
+          {
+            "text": "The Delawares are children of the tortoise, and they outstrip the deer. Saturday, August 15th. The sea unbroken all round. No land insight. The inmates being removed. At the appointed hour, a few cannonballs were fired through the stone walls."
+          }
+        ],
+        "phrases": [
+          {
+            "speaker": 1,
+            "offsetMilliseconds": 160,
+            "durationMilliseconds": 3200,
+            "text": "The Delawares are children of the tortoise, and they outstrip the deer.",
+            "words": [
+              {
+                "text": "The",
+                "offsetMilliseconds": 160,
+                "durationMilliseconds": 120
+              },
+              {
+                "text": "Delawares",
+                "offsetMilliseconds": 280,
+                "durationMilliseconds": 600
+              },
+              {
+                "text": "are",
+                "offsetMilliseconds": 880,
+                "durationMilliseconds": 80
+              },
+              {
+                "text": "children",
+                "offsetMilliseconds": 960,
+                "durationMilliseconds": 400
+              },
+              {
+                "text": "of",
+                "offsetMilliseconds": 1360,
+                "durationMilliseconds": 80
+              },
+              {
+                "text": "the",
+                "offsetMilliseconds": 1440,
+                "durationMilliseconds": 120
+              },
+              {
+                "text": "tortoise,",
+                "offsetMilliseconds": 1560,
+                "durationMilliseconds": 480
+              },
+              {
+                "text": "and",
+                "offsetMilliseconds": 2040,
+                "durationMilliseconds": 120
+              },
+              {
+                "text": "they",
+                "offsetMilliseconds": 2160,
+                "durationMilliseconds": 80
+              },
+              {
+                "text": "outstrip",
+                "offsetMilliseconds": 2240,
+                "durationMilliseconds": 560
+              },
+              {
+                "text": "the",
+                "offsetMilliseconds": 2800,
+                "durationMilliseconds": 80
+              },
+              {
+                "text": "deer.",
+                "offsetMilliseconds": 2880,
+                "durationMilliseconds": 480
+              }
+            ],
+            "locale": "en-US",
+            "confidence": 0.8844265
+          },
+          {
+            "speaker": 2,
+            "offsetMilliseconds": 4400,
+            "durationMilliseconds": 1920,
+            "text": "Saturday, August 15th.",
+            "words": [
+              {
+                "text": "Saturday,",
+                "offsetMilliseconds": 4400,
+                "durationMilliseconds": 640
+              },
+              {
+                "text": "August",
+                "offsetMilliseconds": 5360,
+                "durationMilliseconds": 360
+              },
+              {
+                "text": "15th.",
+                "offsetMilliseconds": 5720,
+                "durationMilliseconds": 600
+              }
+            ],
+            "locale": "en-US",
+            "confidence": 0.8844265
+          },
+          {
+            "speaker": 2,
+            "offsetMilliseconds": 7280,
+            "durationMilliseconds": 1800,
+            "text": "The sea unbroken all round.",
+            "words": [
+              {
+                "text": "The",
+                "offsetMilliseconds": 7280,
+                "durationMilliseconds": 120
+              },
+              {
+                "text": "sea",
+                "offsetMilliseconds": 7400,
+                "durationMilliseconds": 400
+              },
+              {
+                "text": "unbroken",
+                "offsetMilliseconds": 7800,
+                "durationMilliseconds": 520
+              },
+              {
+                "text": "all",
+                "offsetMilliseconds": 8320,
+                "durationMilliseconds": 240
+              },
+              {
+                "text": "round.",
+                "offsetMilliseconds": 8560,
+                "durationMilliseconds": 520
+              }
+            ],
+            "locale": "en-US",
+            "confidence": 0.8844265
+          },
+          {
+            "speaker": 2,
+            "offsetMilliseconds": 9600,
+            "durationMilliseconds": 1120,
+            "text": "No land insight.",
+            "words": [
+              {
+                "text": "No",
+                "offsetMilliseconds": 9600,
+                "durationMilliseconds": 240
+              },
+              {
+                "text": "land",
+                "offsetMilliseconds": 9840,
+                "durationMilliseconds": 280
+              },
+              {
+                "text": "insight.",
+                "offsetMilliseconds": 10120,
+                "durationMilliseconds": 600
+              }
+            ],
+            "locale": "en-US",
+            "confidence": 0.8844265
+          },
+          {
+            "speaker": 3,
+            "offsetMilliseconds": 11280,
+            "durationMilliseconds": 1600,
+            "text": "The inmates being removed.",
+            "words": [
+              {
+                "text": "The",
+                "offsetMilliseconds": 11280,
+                "durationMilliseconds": 120
+              },
+              {
+                "text": "inmates",
+                "offsetMilliseconds": 11400,
+                "durationMilliseconds": 520
+              },
+              {
+                "text": "being",
+                "offsetMilliseconds": 11920,
+                "durationMilliseconds": 320
+              },
+              {
+                "text": "removed.",
+                "offsetMilliseconds": 12240,
+                "durationMilliseconds": 640
+              }
+            ],
+            "locale": "en-US",
+            "confidence": 0.8844265
+          },
+          {
+            "speaker": 3,
+            "offsetMilliseconds": 13280,
+            "durationMilliseconds": 4240,
+            "text": "At the appointed hour, a few cannonballs were fired through the stone walls.",
+            "words": [
+              {
+                "text": "At",
+                "offsetMilliseconds": 13280,
+                "durationMilliseconds": 200
+              },
+              {
+                "text": "the",
+                "offsetMilliseconds": 13480,
+                "durationMilliseconds": 80
+              },
+              {
+                "text": "appointed",
+                "offsetMilliseconds": 13560,
+                "durationMilliseconds": 520
+              },
+              {
+                "text": "hour,",
+                "offsetMilliseconds": 14080,
+                "durationMilliseconds": 560
+              },
+              {
+                "text": "a",
+                "offsetMilliseconds": 14840,
+                "durationMilliseconds": 40
+              },
+              {
+                "text": "few",
+                "offsetMilliseconds": 14880,
+                "durationMilliseconds": 240
+              },
+              {
+                "text": "cannonballs",
+                "offsetMilliseconds": 15120,
+                "durationMilliseconds": 720
+              },
+              {
+                "text": "were",
+                "offsetMilliseconds": 15840,
+                "durationMilliseconds": 160
+              },
+              {
+                "text": "fired",
+                "offsetMilliseconds": 16000,
+                "durationMilliseconds": 400
+              },
+              {
+                "text": "through",
+                "offsetMilliseconds": 16400,
+                "durationMilliseconds": 160
+              },
+              {
+                "text": "the",
+                "offsetMilliseconds": 16560,
+                "durationMilliseconds": 80
+              },
+              {
+                "text": "stone",
+                "offsetMilliseconds": 16640,
+                "durationMilliseconds": 320
+              },
+              {
+                "text": "walls.",
+                "offsetMilliseconds": 16960,
+                "durationMilliseconds": 560
+              }
+            ],
+            "locale": "en-US",
+            "confidence": 0.8844265
+          }
+        ]
+      }
+    }
+  },
+  "language": {
+    "input": "Transcript returned for multi-speaker-sequence.flac.",
+    "sentimentAnalysis": {
+      "kind": "SentimentAnalysisResults",
+      "results": {
+        "documents": [
+          {
+            "id": "multi-speaker-sequence",
+            "sentiment": "negative",
+            "confidenceScores": {
+              "positive": 0,
+              "neutral": 0.09,
+              "negative": 0.91
+            },
+            "sentences": [
+              {
+                "sentiment": "neutral",
+                "confidenceScores": {
+                  "positive": 0,
+                  "neutral": 0.91,
+                  "negative": 0.09
+                },
+                "offset": 0,
+                "length": 72,
+                "text": "The Delawares are children of the tortoise, and they outstrip the deer. ",
+                "targets": [],
+                "assessments": []
+              },
+              {
+                "sentiment": "neutral",
+                "confidenceScores": {
+                  "positive": 0,
+                  "neutral": 1,
+                  "negative": 0
+                },
+                "offset": 72,
+                "length": 23,
+                "text": "Saturday, August 15th. ",
+                "targets": [],
+                "assessments": []
+              },
+              {
+                "sentiment": "neutral",
+                "confidenceScores": {
+                  "positive": 0.03,
+                  "neutral": 0.59,
+                  "negative": 0.38
+                },
+                "offset": 95,
+                "length": 28,
+                "text": "The sea unbroken all round. ",
+                "targets": [
+                  {
+                    "sentiment": "positive",
+                    "confidenceScores": {
+                      "positive": 0.76,
+                      "negative": 0.24
+                    },
+                    "offset": 99,
+                    "length": 3,
+                    "text": "sea",
+                    "relations": [
+                      {
+                        "relationType": "assessment",
+                        "ref": "#/documents/0/sentences/2/assessments/0"
+                      }
+                    ]
+                  }
+                ],
+                "assessments": [
+                  {
+                    "sentiment": "positive",
+                    "confidenceScores": {
+                      "positive": 0.76,
+                      "negative": 0.24
+                    },
+                    "offset": 103,
+                    "length": 8,
+                    "text": "unbroken",
+                    "isNegated": false
+                  }
+                ]
+              },
+              {
+                "sentiment": "negative",
+                "confidenceScores": {
+                  "positive": 0,
+                  "neutral": 0.12,
+                  "negative": 0.88
+                },
+                "offset": 123,
+                "length": 17,
+                "text": "No land insight. ",
+                "targets": [],
+                "assessments": []
+              },
+              {
+                "sentiment": "neutral",
+                "confidenceScores": {
+                  "positive": 0.01,
+                  "neutral": 0.8,
+                  "negative": 0.19
+                },
+                "offset": 140,
+                "length": 27,
+                "text": "The inmates being removed. ",
+                "targets": [],
+                "assessments": []
+              },
+              {
+                "sentiment": "negative",
+                "confidenceScores": {
+                  "positive": 0,
+                  "neutral": 0.06,
+                  "negative": 0.94
+                },
+                "offset": 167,
+                "length": 76,
+                "text": "At the appointed hour, a few cannonballs were fired through the stone walls.",
+                "targets": [],
+                "assessments": []
+              }
+            ],
+            "warnings": []
+          }
+        ],
+        "errors": [],
+        "modelVersion": "2025-01-01"
+      }
+    },
+    "keyPhraseExtraction": {
+      "kind": "KeyPhraseExtractionResults",
+      "results": {
+        "documents": [
+          {
+            "id": "multi-speaker-sequence",
+            "keyPhrases": [
+              "The Delawares",
+              "land insight",
+              "stone walls",
+              "children",
+              "tortoise",
+              "deer",
+              "Saturday",
+              "sea",
+              "inmates",
+              "hour",
+              "cannonballs"
+            ],
+            "warnings": []
+          }
+        ],
+        "errors": [],
+        "modelVersion": "2022-10-01"
+      }
+    }
+  },
+  "translator": {
+    "request": {
+      "from": "en",
+      "to": "nl"
+    },
+    "response": [
+      {
+        "translations": [
+          {
+            "text": "De Delawares zijn kinderen van de schildpad en ze zijn de herten sterker dan de herten. Zaterdag 15 augustus. De zee ononderbroken overal. Geen landinzicht. De gevangenen worden verwijderd. Op het afgesproken tijdstip werden er enkele kanonskogels door de stenen muren afgevuurd.",
+            "to": "nl"
+          }
+        ]
+      }
+    ]
+  }
+}
