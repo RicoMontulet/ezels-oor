@@ -20,8 +20,6 @@ LibriSpeech wordt verspreid onder de [Creative Commons Attribution 4.0 Internati
 
 ## Verwachte uitvoer
 
-Ieder `.expected.json`-bestand volgt het `TranscribeResult`-schema van de Azure Speech Fast Transcription API `2025-10-15`. De fixtures gebruiken de velden `durationMilliseconds`, `combinedPhrases` en `phrases`. Iedere phrase bevat `offsetMilliseconds`, `durationMilliseconds`, `text`, `locale` en een `speaker`-testlabel.
-
 De speakerlabels zijn lokale verwachte labels. Azure kent speakergetallen per transcriptie zonder vaste volgorde toe; vergelijk diarization daarom op consistente sprekerwissels en niet op exacte nummers. `mai-transcribe-1` ondersteunt momenteel geen diarization en zal geen `speaker`-velden teruggeven. Gebruik een Azure Speech-model met diarization om alle fixturevelden te vergelijken.
 
 De referentietranscripten komen uit LibriSpeech. Segmenttijden van het samengestelde bestand zijn gebaseerd op de grenzen tussen de bronclips; er zijn geen confidencewaarden of woordtimestamps toegevoegd.

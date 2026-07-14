@@ -1,22 +1,12 @@
 # EzelsOor
 
-
-
 EzelsOor is een hackathonproject voor het opnemen, transcriberen en samenvatten van gesprekken.
-
-
 
 Een Raspberry Pi neemt audio op via een aangesloten microfoon. De audio wordt verwerkt met diensten in Azure AI Foundry. De oplossing herkent verschillende sprekers, zet gesproken tekst om naar geschreven tekst en genereert met een taalmodel een samenvatting.
 
-
-
 ## Doel van de hackathon
 
-
-
 Aan het einde van de hackathon willen we een werkende demonstratie waarin:
-
-
 
 1. een gesprek via de Raspberry Pi wordt opgenomen;
 
@@ -31,13 +21,10 @@ Aan het einde van de hackathon willen we een werkende demonstratie waarin:
 6. het resultaat zichtbaar of opvraagbaar is.
 
 
-
 De nadruk ligt op een werkende end-to-end ervaring. De oplossing hoeft niet production-ready te zijn.
 
 
-
 ## Werkgebieden
-
 
 
 * `device/`: audio-opname en communicatie vanaf de Raspberry Pi.
