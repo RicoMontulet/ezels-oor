@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EzelsOor opname</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main>
+    <h1>EzelsOor opname</h1>
+    <p class="device-note">Microfoon: Jabra PHS002W</p>
+
+    <div class="status" id="status">Status wordt geladen&hellip;</div>
+    <div class="timer" id="timer">00:00</div>
+
+    <div class="controls">
+      <button id="btn-record" class="btn btn-record">Opnemen</button>
+      <button id="btn-stop" class="btn btn-stop" disabled>Stop</button>
+      <button id="btn-send" class="btn btn-send" disabled>Verstuur naar backend</button>
+    </div>
+
+    <div class="playback" id="playback" hidden>
+      <audio id="player" controls></audio>
+      <a id="btn-download" class="btn btn-download" download>Download</a>
+    </div>
+
+    <div class="message" id="message"></div>
+  </main>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

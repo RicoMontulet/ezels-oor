@@ -15,6 +15,7 @@
 
 # Alleen expliciet beoordeelde, gelicentieerde testsamples mogen mee
 !samples/test-data/*.flac
+!samples/test-data/*.wav
 
 # Gegenereerde uitvoer
 dist/
