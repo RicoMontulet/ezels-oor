@@ -1,0 +1,478 @@
+openapi: 3.1.0
+info:
+  title: EzelsOor Backend API
+  version: 1.0.0
+  description: |
+    API for uploading conversation recordings and retrieving their processing status,
+    transcript, summary, and language analysis. Processing starts automatically after
+    upload and is asynchronous.
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+# This hackathon API has no authentication requirement yet.
+security: []
+tags:
+  - name: Recordings
+    description: Upload and list conversation recordings.
+  - name: Results
+    description: Retrieve processing results for a recording.
+paths:
+  /recordings:
+    post:
+      tags: [Recordings]
+      summary: Upload a recording
+      description: Uploads an audio file and queues it for transcription and analysis.
+      operationId: uploadRecording
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [audio]
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                  description: Audio file to transcribe.
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                  description: Human-readable title for the recording.
+                  example: Project check-in
+                recordedAt:
+                  type: string
+                  format: date-time
+                  description: When the recording started. Defaults to the upload time when omitted.
+                  example: '2026-07-13T09:30:00Z'
+                locale:
+                  type: string
+                  description: BCP 47 language tag used for transcription.
+                  default: nl-NL
+                  example: en-US
+      responses:
+        '202':
+          description: Recording accepted and queued for processing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordingAccepted'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags: [Recordings]
+      summary: List recordings
+      description: Returns recording metadata for the frontend overview.
+      operationId: listRecordings
+      responses:
+        '200':
+          description: Recording metadata ordered from newest to oldest.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [recordings]
+                properties:
+                  recordings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Recording'
+              example:
+                recordings:
+                  - id: rec_01J2XQ5A8FZP4B9K6D3M7H1V2C
+                    title: Team stand-up
+                    recordedAt: '2026-07-13T09:30:00Z'
+                    filename: multi-speaker-sequence.flac
+                    durationMilliseconds: 17710
+                    locale: en-US
+                    status: completed
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /recordings/{recordingId}/status:
+    get:
+      tags: [Results]
+      summary: Get processing status
+      description: Poll this endpoint after upload until the status is `completed` or `failed`.
+      operationId: getRecordingStatus
+      parameters:
+        - $ref: '#/components/parameters/RecordingId'
+      responses:
+        '200':
+          description: Current processing status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessingStatus'
+              examples:
+                processing:
+                  value:
+                    recordingId: rec_01J2XQ5A8FZP4B9K6D3M7H1V2C
+                    status: transcribing
+                failed:
+                  value:
+                    recordingId: rec_01J2XQ5A8FZP4B9K6D3M7H1V2C
+                    status: failed
+                    error:
+                      code: TRANSCRIPTION_FAILED
+                      message: The recording could not be transcribed.
+        '404':
+          $ref: '#/components/responses/RecordingNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /recordings/{recordingId}/transcript:
+    get:
+      tags: [Results]
+      summary: Get transcript
+      description: Returns the complete transcript and its timestamped, speaker-labelled segments.
+      operationId: getRecordingTranscript
+      parameters:
+        - $ref: '#/components/parameters/RecordingId'
+      responses:
+        '200':
+          description: Transcript for a completed recording.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transcript'
+              example:
+                recordingId: rec_01J2XQ5A8FZP4B9K6D3M7H1V2C
+                text: The Delawares are children of the tortoise, and they outstrip the deer. Saturday, August 15th.
+                segments:
+                  - speaker: Speaker 1
+                    offsetMilliseconds: 160
+                    durationMilliseconds: 3200
+                    text: The Delawares are children of the tortoise, and they outstrip the deer.
+                    locale: en-US
+                    confidence: 0.8844265
+                  - speaker: Speaker 2
+                    offsetMilliseconds: 4400
+                    durationMilliseconds: 1920
+                    text: Saturday, August 15th.
+                    locale: en-US
+                    confidence: 0.8844265
+        '404':
+          $ref: '#/components/responses/RecordingNotFound'
+        '409':
+          $ref: '#/components/responses/ResultsNotReady'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /recordings/{recordingId}/summary:
+    get:
+      tags: [Results]
+      summary: Get generated summary
+      description: Returns the summary and extracted follow-up items for a completed recording.
+      operationId: getRecordingSummary
+      parameters:
+        - $ref: '#/components/parameters/RecordingId'
+      responses:
+        '200':
+          description: Generated summary for a completed recording.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Summary'
+              example:
+                recordingId: rec_01J2XQ5A8FZP4B9K6D3M7H1V2C
+                summary: The speakers discussed the current project status and agreed to share the next steps.
+                agreements:
+                  - Share the project plan before the next meeting.
+                actionItems:
+                  - description: Send the project plan to the team.
+                    assignee: Speaker 1
+                openQuestions:
+                  - Which milestones need to be prioritised?
+        '404':
+          $ref: '#/components/responses/RecordingNotFound'
+        '409':
+          $ref: '#/components/responses/ResultsNotReady'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /recordings/{recordingId}/analysis:
+    get:
+      tags: [Results]
+      summary: Get language analysis
+      description: Returns sentiment and key phrases extracted from the completed transcript.
+      operationId: getRecordingAnalysis
+      parameters:
+        - $ref: '#/components/parameters/RecordingId'
+      responses:
+        '200':
+          description: Language analysis for a completed recording.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Analysis'
+              example:
+                recordingId: rec_01J2XQ5A8FZP4B9K6D3M7H1V2C
+                sentiment:
+                  label: negative
+                  confidenceScores:
+                    positive: 0
+                    neutral: 0.09
+                    negative: 0.91
+                sentences:
+                  - text: No land insight.
+                    offset: 123
+                    length: 17
+                    sentiment: negative
+                    confidenceScores:
+                      positive: 0
+                      neutral: 0.12
+                      negative: 0.88
+                keyPhrases: [The Delawares, land insight, stone walls]
+        '404':
+          $ref: '#/components/responses/RecordingNotFound'
+        '409':
+          $ref: '#/components/responses/ResultsNotReady'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  parameters:
+    RecordingId:
+      name: recordingId
+      in: path
+      required: true
+      description: Backend-assigned identifier for the recording.
+      schema:
+        type: string
+        example: rec_01J2XQ5A8FZP4B9K6D3M7H1V2C
+  responses:
+    RecordingNotFound:
+      description: No recording exists with the supplied identifier.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ResultsNotReady:
+      description: Processing has not completed, so the requested result is not available.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    PayloadTooLarge:
+      description: The audio file exceeds the supported upload size.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnsupportedMediaType:
+      description: The uploaded audio format is not supported.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ValidationError:
+      description: The upload metadata or audio file is invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: An unexpected server error occurred.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    RecordingAccepted:
+      type: object
+      required: [id, status]
+      properties:
+        id:
+          type: string
+          example: rec_01J2XQ5A8FZP4B9K6D3M7H1V2C
+        status:
+          $ref: '#/components/schemas/RecordingStatus'
+      example:
+        id: rec_01J2XQ5A8FZP4B9K6D3M7H1V2C
+        status: queued
+    Recording:
+      type: object
+      required: [id, title, recordedAt, filename, durationMilliseconds, locale, status]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        recordedAt:
+          type: string
+          format: date-time
+        filename:
+          type: string
+          description: Original audio filename supplied at upload.
+        durationMilliseconds:
+          type: integer
+          minimum: 0
+          description: Audio duration in milliseconds.
+        locale:
+          type: string
+          description: BCP 47 language tag used for transcription.
+        status:
+          $ref: '#/components/schemas/RecordingStatus'
+    ProcessingStatus:
+      type: object
+      required: [recordingId, status]
+      properties:
+        recordingId:
+          type: string
+        status:
+          $ref: '#/components/schemas/RecordingStatus'
+        error:
+          $ref: '#/components/schemas/ProcessingError'
+      description: The error property is present only when status is `failed`.
+    RecordingStatus:
+      type: string
+      enum: [queued, transcribing, analyzing, completed, failed]
+    Transcript:
+      type: object
+      required: [recordingId, text, segments]
+      properties:
+        recordingId:
+          type: string
+        text:
+          type: string
+          description: Complete readable transcript in chronological order.
+        segments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TranscriptSegment'
+    TranscriptSegment:
+      type: object
+      required: [speaker, offsetMilliseconds, durationMilliseconds, text, locale, confidence]
+      properties:
+        speaker:
+          type: string
+          description: Speaker label stable only within this recording.
+          example: Speaker 1
+        offsetMilliseconds:
+          type: integer
+          minimum: 0
+          description: Segment start relative to the beginning of the recording.
+        durationMilliseconds:
+          type: integer
+          minimum: 0
+        text:
+          type: string
+        locale:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+    Summary:
+      type: object
+      required: [recordingId, summary, agreements, actionItems, openQuestions]
+      properties:
+        recordingId:
+          type: string
+        summary:
+          type: string
+        agreements:
+          type: array
+          items:
+            type: string
+        actionItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionItem'
+        openQuestions:
+          type: array
+          items:
+            type: string
+    ActionItem:
+      type: object
+      required: [description]
+      properties:
+        description:
+          type: string
+        assignee:
+          type: string
+          description: Person or speaker label, if identified.
+    Analysis:
+      type: object
+      required: [recordingId, sentiment, sentences, keyPhrases]
+      properties:
+        recordingId:
+          type: string
+        sentiment:
+          $ref: '#/components/schemas/Sentiment'
+        sentences:
+          type: array
+          items:
+            $ref: '#/components/schemas/SentenceSentiment'
+        keyPhrases:
+          type: array
+          items:
+            type: string
+    Sentiment:
+      type: object
+      required: [label, confidenceScores]
+      properties:
+        label:
+          $ref: '#/components/schemas/SentimentLabel'
+        confidenceScores:
+          $ref: '#/components/schemas/ConfidenceScores'
+    SentenceSentiment:
+      type: object
+      required: [text, offset, length, sentiment, confidenceScores]
+      properties:
+        text:
+          type: string
+        offset:
+          type: integer
+          minimum: 0
+          description: Character offset in the complete transcript.
+        length:
+          type: integer
+          minimum: 0
+          description: Character length in the complete transcript.
+        sentiment:
+          $ref: '#/components/schemas/SentimentLabel'
+        confidenceScores:
+          $ref: '#/components/schemas/ConfidenceScores'
+    SentimentLabel:
+      type: string
+      enum: [positive, neutral, negative, mixed]
+    ConfidenceScores:
+      type: object
+      required: [positive, neutral, negative]
+      properties:
+        positive:
+          type: number
+          minimum: 0
+          maximum: 1
+        neutral:
+          type: number
+          minimum: 0
+          maximum: 1
+        negative:
+          type: number
+          minimum: 0
+          maximum: 1
+    ProcessingError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: TRANSCRIPTION_FAILED
+        message:
+          type: string
+          example: The recording could not be transcribed.
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: RECORDING_NOT_FOUND
+        message:
+          type: string
+          example: No recording exists with the supplied identifier.
