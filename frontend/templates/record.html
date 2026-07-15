@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-[80vh]">
+    <h1 class="text-4xl font-bold text-gray-800 mb-8">Audio Recording</h1>
+    
+    <div class="relative">
+        <button id="recordButton" onclick="toggleRecording()" class="w-48 h-48 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-red-300">
+            <div id="buttonIcon" class="text-6xl">
+                🎙️
+            </div>
+        </button>
+        <div id="recordingIndicator" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full animate-pulse hidden">
+            <div class="w-full h-full bg-red-500 rounded-full animate-ping"></div>
+        </div>
+    </div>
+    
+    <p id="statusText" class="mt-8 text-xl text-gray-600">Click to start recording</p>
+    
+    <div id="recordingInfo" class="mt-4 text-sm text-gray-500 hidden">
+        <p>Recording duration: <span id="duration">00:00</span></p>
+    </div>
+</div>
+
+<script>
+let isRecording = false;
+let recordingStartTime = null;
+let durationInterval = null;
+
+function toggleRecording() {
+    const button = document.getElementById('recordButton');
+    const buttonIcon = document.getElementById('buttonIcon');
+    const statusText = document.getElementById('statusText');
+    const recordingIndicator = document.getElementById('recordingIndicator');
+    const recordingInfo = document.getElementById('recordingInfo');
+    
+    if (!isRecording) {
+        // Start recording
+        startRecording();
+        button.classList.remove('bg-red-500', 'hover:bg-red-600');
+        button.classList.add('bg-red-700', 'hover:bg-red-800');
+        buttonIcon.textContent = '⏹️';
+        statusText.textContent = 'Recording...';
+        recordingIndicator.classList.remove('hidden');
+        recordingInfo.classList.remove('hidden');
+        isRecording = true;
+        
+        // Start duration counter
+        recordingStartTime = new Date();
+        durationInterval = setInterval(updateDuration, 1000);
+    } else {
+        // Stop recording
+        stopRecording();
+        button.classList.remove('bg-red-700', 'hover:bg-red-800');
+        button.classList.add('bg-red-500', 'hover:bg-red-600');
+        buttonIcon.textContent = '🎙️';
+        statusText.textContent = 'Recording stopped';
+        recordingIndicator.classList.add('hidden');
+        isRecording = false;
+        
+        // Stop duration counter
+        clearInterval(durationInterval);
+    }
+}
+
+function updateDuration() {
+    const now = new Date();
+    const diff = Math.floor((now - recordingStartTime) / 1000);
+    const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
+    const seconds = (diff % 60).toString().padStart(2, '0');
+    document.getElementById('duration').textContent = `${minutes}:${seconds}`;
+}
+
+function startRecording() {
+    // Call the mockup API to start recording
+    fetch('/api/recording/start', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Recording started:', data);
+    })
+    .catch(error => {
+        console.error('Error starting recording:', error);
+    });
+}
+
+function stopRecording() {
+    // Call the mockup API to stop recording
+    fetch('/api/recording/stop', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Recording stopped:', data);
+    })
+    .catch(error => {
+        console.error('Error stopping recording:', error);
+    });
+}
+</script>
+{% endblock %}

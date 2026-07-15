@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-gray-800">Current Meeting Transcription</h1>
+        <button onclick="autoRefresh()" class="ilionx-red-bg hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Refresh
+        </button>
+    </div>
+
+    {% if transcription %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Transcription Section -->
+        <div class="bg-white rounded-xl card-shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <span class="text-2xl">📝</span> Transcription
+            </h2>
+            <div class="transcription-text text-gray-700 max-h-96 overflow-y-auto">
+                {% if transcription.text %}
+                    <p>{{ transcription.text }}</p>
+                {% else %}
+                    <p class="text-gray-500 italic">No transcription available</p>
+                {% endif %}
+            </div>
+            {% if transcription.metadata %}
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <p class="text-sm text-gray-500">
+                    <strong>Duration:</strong> {{ transcription.metadata.duration or 'N/A' }} |
+                    <strong>Language:</strong> {{ transcription.metadata.language or 'N/A' }}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Summary Section -->
+        <div class="bg-white rounded-xl card-shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <span class="text-2xl">📋</span> Summary
+            </h2>
+            <div class="text-gray-700 max-h-96 overflow-y-auto">
+                {% if transcription.summary %}
+                    <p>{{ transcription.summary }}</p>
+                {% else %}
+                    <p class="text-gray-500 italic">No summary available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Points Section -->
+    <div class="bg-white rounded-xl card-shadow p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span class="text-2xl">✅</span> Action Points
+        </h2>
+        {% if transcription.action_points %}
+        <div class="space-y-3">
+            {% for action in transcription.action_points %}
+            <div class="action-item flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <input type="checkbox" class="mt-1 w-5 h-5 ilionx-red rounded focus:ring-red-500">
+                <div class="flex-1">
+                    <p class="text-gray-800 font-medium">{{ action.text }}</p>
+                    {% if action.assignee %}
+                    <p class="text-sm text-gray-500">Assigned to: {{ action.assignee }}</p>
+                    {% endif %}
+                    {% if action.due_date %}
+                    <p class="text-sm text-gray-500">Due: {{ action.due_date }}</p>
+                    {% endif %}
+                </div>
+                {% if action.priority %}
+                <span class="px-2 py-1 text-xs font-medium rounded-full
+                    {% if action.priority == 'high' %}bg-red-100 text-red-800
+                    {% elif action.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                    {% else %}bg-green-100 text-green-800{% endif %}">
+                    {{ action.priority }}
+                </span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 italic">No action points available</p>
+        {% endif %}
+    </div>
+
+    <!-- Participants Section -->
+    <div class="bg-white rounded-xl card-shadow p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <span class="text-2xl">👥</span> Participants
+        </h2>
+        {% if transcription.participants %}
+        <div class="flex flex-wrap gap-3">
+            {% for participant in transcription.participants %}
+            <div class="flex items-center gap-2 bg-red-100 text-red-800 px-4 py-2 rounded-full">
+                <span class="w-8 h-8 ilionx-red-bg text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    {{ participant.name[0]|upper if participant.name else '?' }}
+                </span>
+                <span class="font-medium">{{ participant.name }}</span>
+                {% if participant.role %}
+                <span class="text-xs ilionx-red">({{ participant.role }})</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 italic">No participants information available</p>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-xl card-shadow p-12 text-center">
+        <div class="text-6xl mb-4">🎙️</div>
+        <h2 class="text-2xl font-semibold text-gray-800 mb-2">No Active Transcription</h2>
+        <p class="text-gray-500">There is currently no active meeting transcription. Start a recording to see real-time transcription data.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
