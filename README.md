@@ -129,67 +129,30 @@ Werk in korte feature branches en maak kleine pull requests. Directe afstemming 
 
 ### Aan de slag
 
+De repository is publiek. Niemand heeft schrijftoegang tot `RicoMontulet/ezels-oor` zelf; iedereen (ook teams) werkt via een eigen fork.
 
-
-Kies eerst een korte, herkenbare teamnaam. Gebruik kleine letters en koppeltekens, bijvoorbeeld `team-audio`.
-
-
-
-Clone daarna de publieke repository:
-
-
-
-```bash
-git clone https://github.com/RicoMontulet/ezels-oor.git
-cd ezels-oor
-```
-
-
-
-Maak een eigen branch met de teamnaam. Werk niet rechtstreeks op `main`:
-
-
-
-```bash
-git switch -c <teamnaam>
-git push -u origin <teamnaam>
-```
-
-
-
-Werk vanaf deze branch en commit kleine, samenhangende wijzigingen:
-
-
-
-```bash
-git add <bestanden>
-git commit -m "<korte beschrijving>"
-git push
-```
-
-
-
-Open een pull request naar `main` zodra een wijziging gedeeld of geïntegreerd kan worden.
-
-### Bijdragen zonder schrijftoegang (fork)
-
-De repository is publiek. Iedereen kan bijdragen zonder schrijftoegang via een fork:
+Fork en clone de repository:
 
 ```bash
 gh repo fork RicoMontulet/ezels-oor --clone
 cd ezels-oor
-git switch -c <korte-beschrijving-van-je-wijziging>
 ```
 
-Werk vanaf deze branch, commit je wijzigingen en push naar je eigen fork:
+Maak een eigen branch met een korte, herkenbare naam. Werk niet rechtstreeks op `main`:
+
+```bash
+git switch -c <teamnaam>
+```
+
+Werk vanaf deze branch en commit kleine, samenhangende wijzigingen:
 
 ```bash
 git add <bestanden>
 git commit -m "<korte beschrijving>"
-git push -u origin <korte-beschrijving-van-je-wijziging>
+git push -u origin <teamnaam>
 ```
 
-Open daarna een pull request terug naar `RicoMontulet/ezels-oor`:
+Open een pull request terug naar `RicoMontulet/ezels-oor` zodra een wijziging gedeeld of geïntegreerd kan worden:
 
 ```bash
 gh pr create --repo RicoMontulet/ezels-oor
