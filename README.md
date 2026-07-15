@@ -171,7 +171,29 @@ git push
 
 Open een pull request naar `main` zodra een wijziging gedeeld of geïntegreerd kan worden.
 
+### Bijdragen zonder schrijftoegang (fork)
 
+De repository is publiek. Iedereen kan bijdragen zonder schrijftoegang via een fork:
+
+```bash
+gh repo fork RicoMontulet/ezels-oor --clone
+cd ezels-oor
+git switch -c <korte-beschrijving-van-je-wijziging>
+```
+
+Werk vanaf deze branch, commit je wijzigingen en push naar je eigen fork:
+
+```bash
+git add <bestanden>
+git commit -m "<korte beschrijving>"
+git push -u origin <korte-beschrijving-van-je-wijziging>
+```
+
+Open daarna een pull request terug naar `RicoMontulet/ezels-oor`:
+
+```bash
+gh pr create --repo RicoMontulet/ezels-oor
+```
 
 Iedere map bevat indien nodig een eigen README met:
 
