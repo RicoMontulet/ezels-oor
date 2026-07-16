@@ -3,9 +3,9 @@
 {% block content %}
 <div class="flex flex-col items-center justify-center min-h-[80vh]">
     <h1 class="text-4xl font-bold text-gray-800 mb-8">Audio Recording</h1>
-    
+
     <div class="relative">
-        <button id="recordButton" onclick="toggleRecording()" class="w-48 h-48 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-red-300">
+        <button id="recordButton" onclick="toggleRecording()" class="w-48 h-48 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-red-300 disabled:opacity-50 disabled:cursor-not-allowed">
             <div id="buttonIcon" class="text-6xl">
                 🎙️
             </div>
@@ -14,11 +14,33 @@
             <div class="w-full h-full bg-red-500 rounded-full animate-ping"></div>
         </div>
     </div>
-    
+
     <p id="statusText" class="mt-8 text-xl text-gray-600">Click to start recording</p>
-    
+
     <div id="recordingInfo" class="mt-4 text-sm text-gray-500 hidden">
         <p>Recording duration: <span id="duration">00:00</span></p>
+    </div>
+
+    <div id="lastRecordingInfo" class="mt-6 hidden">
+        <div class="bg-white rounded-xl card-shadow p-4 max-w-md">
+            <h3 class="font-semibold text-gray-800 mb-2">Last Recording</h3>
+            <p class="text-sm text-gray-600" id="lastRecordingName"></p>
+            <p class="text-sm text-gray-500" id="lastRecordingDuration"></p>
+            <div class="mt-3 flex gap-2">
+                <button onclick="playRecording()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm transition">
+                    Play
+                </button>
+                <button onclick="sendRecording()" id="sendButton" class="flex-1 ilionx-red-bg hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm transition">
+                    Send to Backend
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorInfo" class="mt-4 hidden">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md">
+            <p class="text-red-800 text-sm" id="errorMessage"></p>
+        </div>
     </div>
 </div>
 
@@ -26,41 +48,179 @@
 let isRecording = false;
 let recordingStartTime = null;
 let durationInterval = null;
+let statusInterval = null;
 
-function toggleRecording() {
+// Check status on page load
+checkStatus();
+
+function checkStatus() {
+    fetch('/api/status')
+        .then(response => response.json())
+        .then(data => {
+            updateUIFromStatus(data);
+        })
+        .catch(error => {
+            console.error('Error checking status:', error);
+        });
+}
+
+function updateUIFromStatus(data) {
     const button = document.getElementById('recordButton');
     const buttonIcon = document.getElementById('buttonIcon');
     const statusText = document.getElementById('statusText');
     const recordingIndicator = document.getElementById('recordingIndicator');
     const recordingInfo = document.getElementById('recordingInfo');
-    
-    if (!isRecording) {
-        // Start recording
-        startRecording();
-        button.classList.remove('bg-red-500', 'hover:bg-red-600');
-        button.classList.add('bg-red-700', 'hover:bg-red-800');
-        buttonIcon.textContent = '⏹️';
-        statusText.textContent = 'Recording...';
-        recordingIndicator.classList.remove('hidden');
-        recordingInfo.classList.remove('hidden');
-        isRecording = true;
-        
-        // Start duration counter
-        recordingStartTime = new Date();
-        durationInterval = setInterval(updateDuration, 1000);
-    } else {
-        // Stop recording
-        stopRecording();
-        button.classList.remove('bg-red-700', 'hover:bg-red-800');
-        button.classList.add('bg-red-500', 'hover:bg-red-600');
-        buttonIcon.textContent = '🎙️';
-        statusText.textContent = 'Recording stopped';
-        recordingIndicator.classList.add('hidden');
-        isRecording = false;
-        
-        // Stop duration counter
-        clearInterval(durationInterval);
+    const lastRecordingInfo = document.getElementById('lastRecordingInfo');
+    const errorInfo = document.getElementById('errorInfo');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Handle device error
+    if (data.device_error) {
+        button.disabled = true;
+        statusText.textContent = 'Device error: ' + data.device_error;
+        errorInfo.classList.remove('hidden');
+        errorMessage.textContent = data.device_error;
+        return;
     }
+
+    // Handle last error
+    if (data.last_error) {
+        errorInfo.classList.remove('hidden');
+        errorMessage.textContent = data.last_error;
+    } else {
+        errorInfo.classList.add('hidden');
+    }
+
+    // Update recording state
+    if (data.recording) {
+        if (!isRecording) {
+            isRecording = true;
+            button.classList.remove('bg-red-500', 'hover:bg-red-600');
+            button.classList.add('bg-red-700', 'hover:bg-red-800');
+            buttonIcon.textContent = '⏹️';
+            statusText.textContent = 'Recording...';
+            recordingIndicator.classList.remove('hidden');
+            recordingInfo.classList.remove('hidden');
+            startDurationCounter();
+        }
+    } else {
+        if (isRecording) {
+            isRecording = false;
+            button.classList.remove('bg-red-700', 'hover:bg-red-800');
+            button.classList.add('bg-red-500', 'hover:bg-red-600');
+            buttonIcon.textContent = '🎙️';
+            statusText.textContent = 'Click to start recording';
+            recordingIndicator.classList.add('hidden');
+            recordingInfo.classList.add('hidden');
+            stopDurationCounter();
+        }
+    }
+
+    // Update last recording info
+    if (data.has_recording && data.last_recording) {
+        lastRecordingInfo.classList.remove('hidden');
+        document.getElementById('lastRecordingName').textContent = data.last_recording;
+        // Duration will be updated when recording stops
+    } else {
+        lastRecordingInfo.classList.add('hidden');
+    }
+}
+
+function toggleRecording() {
+    if (isRecording) {
+        stopRecording();
+    } else {
+        startRecording();
+    }
+}
+
+function startRecording() {
+    fetch('/api/record/start', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.ok) {
+            checkStatus();
+        } else {
+            showStatus('error', data.error || 'Failed to start recording');
+        }
+    })
+    .catch(error => {
+        console.error('Error starting recording:', error);
+        showStatus('error', 'Network error: ' + error.message);
+    });
+}
+
+function stopRecording() {
+    fetch('/api/record/stop', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.ok) {
+            checkStatus();
+            // Update last recording info
+            if (data.file) {
+                document.getElementById('lastRecordingName').textContent = data.file;
+                document.getElementById('lastRecordingDuration').textContent = data.duration + 's';
+            }
+        } else {
+            showStatus('error', data.error || 'Failed to stop recording');
+        }
+    })
+    .catch(error => {
+        console.error('Error stopping recording:', error);
+        showStatus('error', 'Network error: ' + error.message);
+    });
+}
+
+function sendRecording() {
+    const sendButton = document.getElementById('sendButton');
+    sendButton.disabled = true;
+    sendButton.textContent = 'Sending...';
+
+    fetch('/api/record/send', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.ok) {
+            showStatus('success', 'Recording sent to backend successfully!');
+        } else {
+            showStatus('error', data.error || 'Failed to send recording');
+        }
+    })
+    .catch(error => {
+        console.error('Error sending recording:', error);
+        showStatus('error', 'Network error: ' + error.message);
+    })
+    .finally(() => {
+        sendButton.disabled = false;
+        sendButton.textContent = 'Send to Backend';
+    });
+}
+
+function playRecording() {
+    window.open('/api/recording/file', '_blank');
+}
+
+function startDurationCounter() {
+    recordingStartTime = new Date();
+    durationInterval = setInterval(updateDuration, 1000);
+}
+
+function stopDurationCounter() {
+    clearInterval(durationInterval);
 }
 
 function updateDuration() {
@@ -71,38 +231,20 @@ function updateDuration() {
     document.getElementById('duration').textContent = `${minutes}:${seconds}`;
 }
 
-function startRecording() {
-    // Call the mockup API to start recording
-    fetch('/api/recording/start', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Recording started:', data);
-    })
-    .catch(error => {
-        console.error('Error starting recording:', error);
-    });
+function showStatus(type, message) {
+    const errorInfo = document.getElementById('errorInfo');
+    const errorMessage = document.getElementById('errorMessage');
+
+    if (type === 'success') {
+        // For success, we could show a temporary message
+        alert(message);
+    } else {
+        errorInfo.classList.remove('hidden');
+        errorMessage.textContent = message;
+    }
 }
 
-function stopRecording() {
-    // Call the mockup API to stop recording
-    fetch('/api/recording/stop', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Recording stopped:', data);
-    })
-    .catch(error => {
-        console.error('Error stopping recording:', error);
-    });
-}
+// Poll status every 2 seconds
+statusInterval = setInterval(checkStatus, 2000);
 </script>
 {% endblock %}

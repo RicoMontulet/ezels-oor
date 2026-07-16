@@ -1,4 +1,8 @@
+# DEPRECATED: This file is maintained for backward compatibility.
+# Please use pyproject.toml and uv package manager instead.
+# Run: uv sync
 Flask==3.0.0
 requests==2.31.0
 python-dotenv==1.0.0
 gunicorn==21.2.0
+Werkzeug==3.0.1
