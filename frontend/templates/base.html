@@ -43,7 +43,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <img src="/temp/logo.png" alt="ilionx logo" class="h-10 w-auto">
+                    <span class="text-2xl font-bold tracking-tight">ilionx</span>
                     <span class="ml-3 text-xl font-bold">Meeting Transcription</span>
                 </div>
                 <div class="flex space-x-4">
@@ -68,7 +68,6 @@
     </footer>
 
     <script>
-        // Auto-refresh functionality
         function autoRefresh() {
             fetch('/api/refresh')
                 .then(response => response.json())
@@ -80,8 +79,11 @@
                 .catch(error => console.error('Error refreshing:', error));
         }
 
-        // Refresh every 30 seconds
-        setInterval(autoRefresh, 30000);
+        // Only auto-refresh dashboard/history — never mid-record on `/`.
+        const path = window.location.pathname;
+        if (path === '/dashboard' || path === '/history') {
+            setInterval(autoRefresh, 30000);
+        }
     </script>
 </body>
 </html>

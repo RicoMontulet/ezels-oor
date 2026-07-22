@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import httpx
+from pydantic import ValidationError
 
 from .config import Settings
 from .schemas import (
@@ -164,9 +165,21 @@ def _scores(value: dict) -> ConfidenceScores:
     )
 
 
+def _first_document(response: dict) -> dict:
+    results = response.get("results") or {}
+    documents = results.get("documents") or []
+    if results.get("errors") or not documents:
+        raise ProcessingFailure(
+            "LANGUAGE_ANALYSIS_FAILED",
+            "The transcript could not be analyzed.",
+            retryable=True,
+        )
+    return documents[0]
+
+
 def analysis_from_language(recording_id: str, sentiment_response: dict, key_phrase_response: dict) -> Analysis:
-    sentiment_document = sentiment_response.get("results", {}).get("documents", [{}])[0]
-    key_phrase_document = key_phrase_response.get("results", {}).get("documents", [{}])[0]
+    sentiment_document = _first_document(sentiment_response)
+    key_phrase_document = _first_document(key_phrase_response)
     sentences = [
         SentenceSentiment(
             text=sentence.get("text", ""),
@@ -188,10 +201,17 @@ def analysis_from_language(recording_id: str, sentiment_response: dict, key_phra
 
 
 def summary_from_llm(recording_id: str, response: dict) -> Summary:
-    return Summary(
-        recordingId=recording_id,
-        summary=response.get("summary", ""),
-        agreements=response.get("agreements", []),
-        actionItems=[ActionItem.model_validate(item) for item in response.get("actionItems", [])],
-        openQuestions=response.get("openQuestions", []),
-    )
+    try:
+        return Summary(
+            recordingId=recording_id,
+            summary=response.get("summary", ""),
+            agreements=response.get("agreements", []),
+            actionItems=[ActionItem.model_validate(item) for item in response.get("actionItems", [])],
+            openQuestions=response.get("openQuestions", []),
+        )
+    except ValidationError as exc:
+        raise ProcessingFailure(
+            "SUMMARY_FAILED",
+            "The transcript could not be summarized.",
+            retryable=True,
+        ) from exc

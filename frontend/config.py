@@ -3,27 +3,28 @@ from typing import Optional
 
 class Config:
     """Configuration for the Flask application"""
-    
-    # Flask Configuration
+
+    # Flask Configuration — DEBUG defaults off; set DEBUG=true in .env for local
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
-    
-    # Server Configuration
-    HOST = os.getenv('HOST', '0.0.0.0')
+
+    # Server Configuration — default localhost for safer demos on LAN
+    HOST = os.getenv('HOST', '127.0.0.1')
     PORT = int(os.getenv('PORT', 8080))
-    
+
     # Backend API Configuration
-    BACKEND_API_URL = os.getenv('BACKEND_API_URL', 'http://localhost:5000/api')
+    BACKEND_API_URL = os.getenv('BACKEND_API_URL', 'http://localhost:8082')
     BACKEND_API_TIMEOUT = int(os.getenv('BACKEND_API_TIMEOUT', 10))
-    
+    RECORDING_APP_URL = os.getenv('RECORDING_APP_URL', 'http://localhost:5001')
+
     # Auto-refresh Configuration
     AUTO_REFRESH_ENABLED = os.getenv('AUTO_REFRESH_ENABLED', 'True').lower() == 'true'
     AUTO_REFRESH_INTERVAL = int(os.getenv('AUTO_REFRESH_INTERVAL', 30))  # seconds
-    
+
     # Display Configuration
     ITEMS_PER_PAGE = int(os.getenv('ITEMS_PER_PAGE', 20))
     MAX_HISTORY_ITEMS = int(os.getenv('MAX_HISTORY_ITEMS', 50))
-    
+
     @staticmethod
     def validate_config() -> bool:
         """Validate that required configuration is present"""
@@ -33,8 +34,7 @@ class Config:
         return True
 
 class DevelopmentConfig(Config):
-    """Development configuration"""
-    DEBUG = True
+    """Development configuration — DEBUG still controlled by env."""
 
 class ProductionConfig(Config):
     """Production configuration"""
@@ -43,7 +43,8 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     """Testing configuration"""
     TESTING = True
-    BACKEND_API_URL = 'http://mock-api:5000/api'
+    DEBUG = False
+    BACKEND_API_URL = 'http://mock-api:8081'
 
 # Configuration dictionary
 config = {

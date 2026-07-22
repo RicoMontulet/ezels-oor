@@ -9,6 +9,7 @@ const playerEl = document.getElementById("player");
 const btnDownload = document.getElementById("btn-download");
 
 let shownRecording = null;
+let backendWarningShown = false;
 
 function formatElapsed(seconds) {
   const m = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -22,50 +23,56 @@ function showMessage(text, isError) {
 }
 
 async function refreshStatus() {
-  const res = await fetch("/api/status");
-  const data = await res.json();
+  try {
+    const res = await fetch("/api/status");
+    const data = await res.json();
 
-  if (data.device_error) {
-    statusEl.textContent = `Apparaatfout: ${data.device_error}`;
-    btnRecord.disabled = true;
-    btnStop.disabled = true;
-    btnSend.disabled = true;
-    playbackEl.hidden = true;
-    return;
-  }
-
-  if (data.recording) {
-    statusEl.textContent = "Bezig met opnemen...";
-    timerEl.textContent = formatElapsed(data.elapsed);
-    btnRecord.disabled = true;
-    btnStop.disabled = false;
-    btnSend.disabled = true;
-    playbackEl.hidden = true;
-    shownRecording = null;
-  } else if (data.has_recording) {
-    statusEl.textContent = `Opname klaar: ${data.last_recording}`;
-    btnRecord.disabled = false;
-    btnStop.disabled = true;
-    btnSend.disabled = !data.backend_configured;
-    if (!data.backend_configured) {
-      showMessage("Backend-URL is niet ingesteld; versturen is uitgeschakeld.", true);
+    if (data.device_error) {
+      statusEl.textContent = `Apparaatfout: ${data.device_error}`;
+      btnRecord.disabled = true;
+      btnStop.disabled = true;
+      btnSend.disabled = true;
+      playbackEl.hidden = true;
+      return;
     }
 
-    playbackEl.hidden = false;
-    if (shownRecording !== data.last_recording) {
-      shownRecording = data.last_recording;
-      playerEl.src = `/api/recording/file?name=${encodeURIComponent(data.last_recording)}`;
-      btnDownload.href = `/api/recording/file?download=1&name=${encodeURIComponent(data.last_recording)}`;
-      btnDownload.download = data.last_recording;
+    if (data.recording) {
+      statusEl.textContent = "Bezig met opnemen...";
+      timerEl.textContent = formatElapsed(data.elapsed);
+      btnRecord.disabled = true;
+      btnStop.disabled = false;
+      btnSend.disabled = true;
+      playbackEl.hidden = true;
+      shownRecording = null;
+      backendWarningShown = false;
+    } else if (data.has_recording) {
+      statusEl.textContent = `Opname klaar: ${data.last_recording}`;
+      btnRecord.disabled = false;
+      btnStop.disabled = true;
+      btnSend.disabled = !data.backend_configured;
+      if (!data.backend_configured && !backendWarningShown) {
+        showMessage("Backend-URL is niet ingesteld; versturen is uitgeschakeld.", true);
+        backendWarningShown = true;
+      }
+
+      playbackEl.hidden = false;
+      if (shownRecording !== data.last_recording) {
+        shownRecording = data.last_recording;
+        playerEl.src = `/api/recording/file?name=${encodeURIComponent(data.last_recording)}`;
+        btnDownload.href = `/api/recording/file?download=1&name=${encodeURIComponent(data.last_recording)}`;
+        btnDownload.download = data.last_recording;
+      }
+    } else {
+      statusEl.textContent = "Klaar om op te nemen";
+      timerEl.textContent = "00:00";
+      btnRecord.disabled = false;
+      btnStop.disabled = true;
+      btnSend.disabled = true;
+      playbackEl.hidden = true;
+      shownRecording = null;
     }
-  } else {
-    statusEl.textContent = "Klaar om op te nemen";
-    timerEl.textContent = "00:00";
-    btnRecord.disabled = false;
-    btnStop.disabled = true;
-    btnSend.disabled = true;
-    playbackEl.hidden = true;
-    shownRecording = null;
+  } catch (err) {
+    statusEl.textContent = "Status ophalen mislukt";
   }
 }
 

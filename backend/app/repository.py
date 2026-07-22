@@ -26,7 +26,7 @@ class Repository:
 
     @contextmanager
     def connection(self):
-        connection = sqlite3.connect(self.database_path)
+        connection = sqlite3.connect(self.database_path, timeout=30)
         connection.row_factory = sqlite3.Row
         try:
             yield connection
@@ -75,8 +75,9 @@ class Repository:
         content_type: str | None,
         file_path: Path,
         locale: str,
+        recording_id: str | None = None,
     ) -> dict:
-        recording_id = f"rec_{uuid4().hex}"
+        recording_id = recording_id or f"rec_{uuid4().hex}"
         now = timestamp()
         row = {
             "id": recording_id,
@@ -139,13 +140,15 @@ class Repository:
             ).fetchone()
             if row is None:
                 return None
+            # Resume at last unfinished phase when transcript already stored.
+            phase = "analyzing" if row["transcript_json"] else "transcribing"
             connection.execute(
                 """UPDATE recordings
-                   SET status = 'transcribing', attempts = attempts + 1,
+                   SET status = ?, attempts = attempts + 1,
                        claimed_at = ?, worker_id = ?, error_code = NULL,
                        error_message = NULL, updated_at = ?
                    WHERE id = ?""",
-                (timestamp(now), worker_id, timestamp(now), row["id"]),
+                (phase, timestamp(now), worker_id, timestamp(now), row["id"]),
             )
             claimed = connection.execute("SELECT * FROM recordings WHERE id = ?", (row["id"],)).fetchone()
         return dict(claimed)

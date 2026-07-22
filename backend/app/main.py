@@ -1,5 +1,7 @@
+import shutil
 from datetime import UTC, datetime
 from pathlib import Path
+from uuid import uuid4
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
@@ -60,7 +62,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         suffix = Path(filename).suffix.lower()
         if suffix not in ALLOWED_EXTENSIONS:
             raise HTTPException(415, Problem(code="UNSUPPORTED_AUDIO_TYPE", message="The uploaded audio format is not supported."))
-        recording_id = f"pending-{datetime.now(UTC).timestamp()}"
+
+        recording_id = f"rec_{uuid4().hex}"
         upload_dir = settings.storage_path / recording_id
         upload_dir.mkdir(parents=True, exist_ok=True)
         destination = upload_dir / filename
@@ -70,31 +73,29 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 while chunk := await audio.read(1024 * 1024):
                     size += len(chunk)
                     if size > settings.upload_max_bytes:
-                        output.close()
-                        destination.unlink(missing_ok=True)
-                        raise HTTPException(413, Problem(code="UPLOAD_TOO_LARGE", message="The audio file exceeds the supported upload size."))
+                        raise HTTPException(
+                            413,
+                            Problem(code="UPLOAD_TOO_LARGE", message="The audio file exceeds the supported upload size."),
+                        )
                     output.write(chunk)
             if size == 0:
-                destination.unlink(missing_ok=True)
                 raise HTTPException(422, Problem(code="INVALID_UPLOAD", message="The audio file is empty."))
+
+            resolved_title = (title or Path(filename).stem or "recording").strip() or "recording"
             recording = repository.create_recording(
-                title=title or Path(filename).stem,
+                recording_id=recording_id,
+                title=resolved_title,
                 recorded_at=recordedAt or datetime.now(UTC),
                 filename=filename,
                 content_type=audio.content_type,
                 file_path=destination,
                 locale=locale or settings.default_locale,
             )
-        except Exception as exc:
-            if not isinstance(exc, HTTPException):
-                destination.unlink(missing_ok=True)
+        except Exception:
+            shutil.rmtree(upload_dir, ignore_errors=True)
             raise
         finally:
             await audio.close()
-        final_dir = settings.storage_path / recording["id"]
-        final_dir.mkdir(parents=True, exist_ok=True)
-        destination.replace(final_dir / filename)
-        repository.update(recording["id"], file_path=str(final_dir / filename))
         return RecordingAccepted(id=recording["id"], status="queued")
 
     @app.get("/recordings", response_model=RecordingList)
@@ -157,4 +158,13 @@ def result(repository: Repository, recording_id: str, kind: str, model):
     return model.model_validate(value)
 
 
-app = create_app()
+_app = None
+
+
+def __getattr__(name: str):
+    global _app
+    if name == "app":
+        if _app is None:
+            _app = create_app()
+        return _app
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

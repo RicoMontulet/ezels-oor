@@ -19,7 +19,7 @@
                 <h2 class="text-2xl font-bold text-gray-800">{{ transcription.title or 'Untitled Recording' }}</h2>
                 <p class="text-sm text-gray-500">
                     <strong>Recorded:</strong> {{ transcription.recordedAt or 'Unknown' }} |
-                    <strong>Duration:</strong> {{ (transcription.durationMilliseconds / 1000)|round(1) }}s |
+                    <strong>Duration:</strong> {{ ((transcription.durationMilliseconds or 0) / 1000)|round(1) }}s |
                     <strong>Language:</strong> {{ transcription.locale or 'Unknown' }} |
                     <strong>Status:</strong>
                     <span class="px-2 py-1 text-xs font-medium rounded-full

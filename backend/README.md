@@ -110,7 +110,7 @@ in de lokale omgeving of een secret store, nooit in de repository.
 | `SPEECH_ENDPOINT`, `SPEECH_API_KEY` | Azure Speech Fast Transcription |
 | `LANGUAGE_ENDPOINT`, `LANGUAGE_API_KEY` | Azure AI Language sentiment en key phrases |
 | `LLM_ENDPOINT`, `LLM_API_KEY`, `LLM_MODEL` | Anthropic Messages-compatibele samenvatting |
-| `DATABASE_URL` | SQLite URL, standaard `sqlite:///./data/ezelsoor.db` |
+| `DATABASE_URL` | SQLite URL; relative paths resolve against repository root |
 | `STORAGE_PATH` | Lokale audio-opslag, standaard `./data/uploads` |
 | `UPLOAD_MAX_BYTES` | Maximale uploadomvang, standaard 100 MiB |
 | `DEFAULT_LOCALE` | Transcriptietaal, standaard `nl-NL` |

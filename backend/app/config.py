@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -9,8 +10,8 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=REPOSITORY_ROOT / ".env", extra="ignore")
 
-    database_url: str = "sqlite:///./data/ezelsoor.db"
-    storage_path: Path = Path("./data/uploads")
+    database_url: str = f"sqlite:///{REPOSITORY_ROOT / 'data' / 'ezelsoor.db'}"
+    storage_path: Path = REPOSITORY_ROOT / "data" / "uploads"
     upload_max_bytes: int = 100 * 1024 * 1024
     default_locale: str = "nl-NL"
     worker_lease_seconds: int = 15 * 60
@@ -28,6 +29,17 @@ class Settings(BaseSettings):
     llm_api_key: str | None = None
     llm_model: str | None = None
     llm_max_tokens: int = 1024
+
+    @model_validator(mode="after")
+    def resolve_relative_paths(self) -> "Settings":
+        if self.database_url.startswith("sqlite:///"):
+            db_path = Path(self.database_url.removeprefix("sqlite:///"))
+            if not db_path.is_absolute():
+                db_path = (REPOSITORY_ROOT / db_path).resolve()
+                self.database_url = f"sqlite:///{db_path}"
+        if not self.storage_path.is_absolute():
+            self.storage_path = (REPOSITORY_ROOT / self.storage_path).resolve()
+        return self
 
 
 @lru_cache

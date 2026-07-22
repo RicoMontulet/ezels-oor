@@ -33,15 +33,12 @@ card 1: PHS002W [Jabra PHS002W], device 0: USB Audio [USB Audio]
 
 ```bash
 cd pi-client
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
 cp .env.example .env
-# vul BACKEND_URL in zodra de backend een endpoint heeft
-python app.py
+# vul BACKEND_URL in (bv. http://localhost:8082/recordings)
+uv run app.py
 ```
 
-Open de UI op `http://<pi-ip>:5000`.
+Open de UI op `http://localhost:5001` (poort 5001 — macOS AirPlay bezet vaak 5000).
 
 ## Configuratie (`.env`)
 
@@ -50,7 +47,9 @@ Open de UI op `http://<pi-ip>:5000`.
 | `BACKEND_URL`       | nee       | Endpoint dat de opname ontvangt. Leeg = versturen staat uit in de UI. |
 | `AUDIO_DEVICE_HINT` | nee       | Substring om het ALSA-apparaat te herkennen (standaard `Jabra`).      |
 | `AUDIO_DEVICE`      | nee       | Forceer een ALSA-apparaat (bv. `plughw:1,0`) en sla autodetectie over.|
-| `HOST` / `PORT`     | nee       | Waar Flask op luistert (standaard `0.0.0.0:5000`).                    |
+| `HOST` / `PORT`     | nee       | Waar Flask op luistert (standaard `0.0.0.0:5001`).                    |
+| `MAX_RECORDINGS`    | nee       | Max lokale WAV-bestanden; oudere worden weggegooid (standaard `20`).  |
+| `RECORDINGS_DIR`    | nee       | Map voor WAV-bestanden (standaard `pi-client/recordings/`).           |
 
 ## Input / output
 
@@ -80,8 +79,8 @@ curl -X POST http://<pi-ip>:5000/api/record/stop
 
 ## Bekende beperkingen
 
-- Eén opname tegelijk; een nieuwe opname start pas na versturen of overschrijft
-  de vorige lokaal.
+- Eén opname tegelijk; na geslaagd versturen wordt het lokale WAV verwijderd.
+  Oude lokale bestanden worden ook beperkt via `MAX_RECORDINGS`.
 - Geen authenticatie op het versturen naar de backend; nog niet nodig voor de
   hackathondemo maar niet geschikt voor productie.
 - Contract in `shared/contracts/recording-upload.md` is een voorstel vanuit dit

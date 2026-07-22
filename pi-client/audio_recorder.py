@@ -1,6 +1,7 @@
 """Recording via `arecord` (ALSA), aimed at a Jabra PHS002W plugged into the Pi."""
 
 import re
+import signal
 import subprocess
 import threading
 import time
@@ -58,15 +59,24 @@ class Recorder:
 
     SAMPLE_RATE = 16000
     CHANNELS = 1
+    WAV_HEADER_BYTES = 44
 
-    def __init__(self, device: str, recordings_dir: Path):
+    def __init__(self, device: str, recordings_dir: Path, max_recordings: int = 20):
         self._device = device
         self._recordings_dir = recordings_dir
         self._recordings_dir.mkdir(parents=True, exist_ok=True)
+        self._max_recordings = max_recordings
         self._process: Optional[subprocess.Popen] = None
         self._path: Optional[Path] = None
         self._started_at: Optional[float] = None
         self._lock = threading.Lock()
+        self._prune_old_recordings()
+
+    def _prune_old_recordings(self) -> None:
+        wavs = sorted(self._recordings_dir.glob("recording-*.wav"), key=lambda p: p.stat().st_mtime)
+        excess = len(wavs) - self._max_recordings
+        for path in wavs[: max(0, excess)]:
+            path.unlink(missing_ok=True)
 
     @property
     def is_recording(self) -> bool:
@@ -97,19 +107,25 @@ class Recorder:
                         str(path),
                     ],
                     stdout=subprocess.DEVNULL,
-                    stderr=subprocess.PIPE,
+                    stderr=subprocess.DEVNULL,
                 )
             except FileNotFoundError as exc:
                 raise RecorderError("arecord is niet geinstalleerd (alsa-utils)") from exc
 
-            time.sleep(0.2)
-            if process.poll() is not None:
-                stderr = process.stderr.read().decode(errors="replace").strip()
-                raise RecorderError(f"opname kon niet starten: {stderr or 'onbekende fout'}")
-
             self._process = process
             self._path = path
             self._started_at = time.time()
+
+        time.sleep(0.2)
+        with self._lock:
+            if self._process is not process:
+                raise RecorderError("opname kon niet starten: state changed")
+            if process.poll() is not None:
+                self._process = None
+                self._path = None
+                self._started_at = None
+                path.unlink(missing_ok=True)
+                raise RecorderError("opname kon niet starten: onbekende fout")
             return path
 
     def stop(self) -> tuple[Path, float]:
@@ -117,16 +133,35 @@ class Recorder:
             if self._process is None or self._process.poll() is not None:
                 raise RecorderError("er loopt geen opname")
 
-            self._process.terminate()
-            try:
-                self._process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                self._process.kill()
-                self._process.wait()
-
-            duration = time.time() - self._started_at
+            process = self._process
             path = self._path
-            self._process = None
-            self._path = None
-            self._started_at = None
+            started_at = self._started_at
+
+        # Wait outside the lock so /api/status is not blocked for seconds.
+        # Keep _process set until wait finishes so start() still sees is_recording.
+        process.send_signal(signal.SIGINT)
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.terminate()
+            try:
+                process.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+
+        with self._lock:
+            if self._process is process:
+                self._process = None
+                self._path = None
+                self._started_at = None
+
+            duration = time.time() - started_at
+
+            if path is None or not path.exists() or path.stat().st_size <= self.WAV_HEADER_BYTES:
+                if path is not None:
+                    path.unlink(missing_ok=True)
+                raise RecorderError("opnamebestand is leeg of corrupt")
+
+            self._prune_old_recordings()
             return path, duration

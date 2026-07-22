@@ -1,11 +1,14 @@
 import argparse
+import json
 import logging
 import socket
 import time
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from .config import get_settings
 from .repository import Repository
+from .schemas import Analysis, Summary, Transcript
 from .services import (
     AzureClient,
     ProcessingFailure,
@@ -17,42 +20,78 @@ from .services import (
 logger = logging.getLogger(__name__)
 
 
+def _schedule_retry(repository: Repository, recording: dict, code: str, message: str) -> None:
+    recording_id = recording["id"]
+    attempts = recording["attempts"]
+    if attempts < repository.settings.max_processing_attempts:
+        repository.update(
+            recording_id,
+            status="queued",
+            claimed_at=None,
+            worker_id=None,
+            next_attempt_at=(
+                datetime.now(UTC) + timedelta(seconds=repository.settings.retry_delay_seconds)
+            ).isoformat(),
+            error_code=code,
+            error_message=message,
+        )
+        logger.warning("Processing %s will retry after failure: %s", recording_id, code)
+    else:
+        repository.update(
+            recording_id,
+            status="failed",
+            claimed_at=None,
+            worker_id=None,
+            error_code=code,
+            error_message=message,
+        )
+        logger.warning("Processing %s failed: %s", recording_id, code)
+
+
 def process_one(repository: Repository, azure: AzureClient, worker_id: str) -> bool:
     recording = repository.claim_next(worker_id)
     if not recording:
         return False
     recording_id = recording["id"]
     try:
-        speech = azure.transcribe(recording["file_path"], recording["locale"])
-        transcript = transcript_from_speech(recording_id, speech)
-        repository.store_result(recording_id, "transcript", transcript.model_dump(mode="json"))
-        repository.update(
-            recording_id,
-            duration_milliseconds=speech.get("durationMilliseconds", 0),
-            status="analyzing",
-        )
-
-        sentiment = azure.analyze(transcript.text, recording["locale"], "SentimentAnalysis")
-        key_phrases = azure.analyze(transcript.text, recording["locale"], "KeyPhraseExtraction")
-        analysis = analysis_from_language(recording_id, sentiment, key_phrases)
-        repository.store_result(recording_id, "analysis", analysis.model_dump(mode="json"))
-
-        summary = summary_from_llm(recording_id, azure.summarize(transcript.text))
-        repository.store_result(recording_id, "summary", summary.model_dump(mode="json"))
-        repository.update(recording_id, status="completed", claimed_at=None, worker_id=None)
-    except ProcessingFailure as exc:
-        attempts = recording["attempts"]
-        if exc.retryable and attempts < repository.settings.max_processing_attempts:
+        if recording.get("transcript_json"):
+            transcript = Transcript.model_validate(json.loads(recording["transcript_json"]))
+        else:
+            audio_path = Path(recording["file_path"])
+            if not audio_path.is_file():
+                raise ProcessingFailure(
+                    "PROCESSING_FAILED",
+                    "The recording audio file is missing.",
+                    retryable=True,
+                )
+            speech = azure.transcribe(audio_path, recording["locale"])
+            transcript = transcript_from_speech(recording_id, speech)
+            repository.store_result(recording_id, "transcript", transcript.model_dump(mode="json"))
             repository.update(
                 recording_id,
-                status="queued",
-                claimed_at=None,
-                worker_id=None,
-                next_attempt_at=(datetime.now(UTC) + timedelta(seconds=repository.settings.retry_delay_seconds)).isoformat(),
-                error_code=exc.code,
-                error_message=exc.message,
+                duration_milliseconds=speech.get("durationMilliseconds", 0),
+                status="analyzing",
             )
-            logger.warning("Processing %s will retry after failure: %s", recording_id, exc.code)
+
+        if recording.get("analysis_json"):
+            analysis = Analysis.model_validate(json.loads(recording["analysis_json"]))
+        else:
+            repository.update(recording_id, status="analyzing")
+            sentiment = azure.analyze(transcript.text, recording["locale"], "SentimentAnalysis")
+            key_phrases = azure.analyze(transcript.text, recording["locale"], "KeyPhraseExtraction")
+            analysis = analysis_from_language(recording_id, sentiment, key_phrases)
+            repository.store_result(recording_id, "analysis", analysis.model_dump(mode="json"))
+
+        if recording.get("summary_json"):
+            Summary.model_validate(json.loads(recording["summary_json"]))
+        else:
+            summary = summary_from_llm(recording_id, azure.summarize(transcript.text))
+            repository.store_result(recording_id, "summary", summary.model_dump(mode="json"))
+
+        repository.update(recording_id, status="completed", claimed_at=None, worker_id=None)
+    except ProcessingFailure as exc:
+        if exc.retryable:
+            _schedule_retry(repository, recording, exc.code, exc.message)
         else:
             repository.update(
                 recording_id,
@@ -64,15 +103,13 @@ def process_one(repository: Repository, azure: AzureClient, worker_id: str) -> b
             )
             logger.warning("Processing %s failed: %s", recording_id, exc.code)
     except Exception:
-        repository.update(
-            recording_id,
-            status="failed",
-            claimed_at=None,
-            worker_id=None,
-            error_code="PROCESSING_FAILED",
-            error_message="The recording could not be processed.",
-        )
         logger.exception("Unexpected failure processing %s", recording_id)
+        _schedule_retry(
+            repository,
+            recording,
+            "PROCESSING_FAILED",
+            "The recording could not be processed.",
+        )
     return True
 
 
