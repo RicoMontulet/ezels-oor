@@ -38,7 +38,10 @@ class AzureClient:
             raise ProcessingFailure("SPEECH_NOT_CONFIGURED", "Speech processing is not configured.")
         audio_path = Path(audio_path)
         definition = {"diarization": {"enabled": True, "maxSpeakers": 10}}
-        if locale != "auto":
+        if locale == "auto":
+            # Candidate locales for auto-detection (Dutch, English, French, German, Spanish)
+            definition["locales"] = ["nl-NL", "en-US", "fr-FR", "de-DE", "es-ES"]
+        else:
             definition["locales"] = [locale]
         content_type = {
             ".aac": "audio/aac",
