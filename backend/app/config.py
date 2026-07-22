@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     database_url: str = f"sqlite:///{REPOSITORY_ROOT / 'data' / 'ezelsoor.db'}"
     storage_path: Path = REPOSITORY_ROOT / "data" / "uploads"
     upload_max_bytes: int = 100 * 1024 * 1024
-    default_locale: str = "nl-NL"
+    default_locale: str = "auto"
     worker_lease_seconds: int = 15 * 60
     worker_poll_seconds: float = 2.0
     max_processing_attempts: int = 3

@@ -77,8 +77,12 @@ def process_one(repository: Repository, azure: AzureClient, worker_id: str) -> b
             analysis = Analysis.model_validate(json.loads(recording["analysis_json"]))
         else:
             repository.update(recording_id, status="analyzing")
-            sentiment = azure.analyze(transcript.text, recording["locale"], "SentimentAnalysis")
-            key_phrases = azure.analyze(transcript.text, recording["locale"], "KeyPhraseExtraction")
+            # Use detected locale from transcript if original was "auto"
+            detected_locale = recording["locale"]
+            if detected_locale == "auto" and transcript.segments:
+                detected_locale = transcript.segments[0].locale or "en-US"
+            sentiment = azure.analyze(transcript.text, detected_locale, "SentimentAnalysis")
+            key_phrases = azure.analyze(transcript.text, detected_locale, "KeyPhraseExtraction")
             analysis = analysis_from_language(recording_id, sentiment, key_phrases)
             repository.store_result(recording_id, "analysis", analysis.model_dump(mode="json"))
 

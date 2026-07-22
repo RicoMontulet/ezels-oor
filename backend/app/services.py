@@ -37,7 +37,9 @@ class AzureClient:
         if not self.settings.speech_endpoint or not self.settings.speech_api_key:
             raise ProcessingFailure("SPEECH_NOT_CONFIGURED", "Speech processing is not configured.")
         audio_path = Path(audio_path)
-        definition = {"locales": [locale], "diarization": {"enabled": True, "maxSpeakers": 10}}
+        definition = {"diarization": {"enabled": True, "maxSpeakers": 10}}
+        if locale != "auto":
+            definition["locales"] = [locale]
         content_type = {
             ".aac": "audio/aac",
             ".flac": "audio/flac",
