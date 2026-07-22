@@ -5,10 +5,9 @@ from pathlib import Path
 from typing import Optional
 
 import requests
+from audio_recorder import Recorder, RecorderError, find_device
 from dotenv import load_dotenv
 from flask import Flask, abort, jsonify, render_template, request, send_from_directory
-
-from audio_recorder import Recorder, RecorderError, find_device
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
@@ -146,7 +145,7 @@ def recording_file():
 
 @app.route("/api/record/send", methods=["POST"])
 def record_send():
-    global _last_error
+    global _last_error, _last_recording
     with _state_lock:
         last = _last_recording
     if last is None or not last["path"].exists():
