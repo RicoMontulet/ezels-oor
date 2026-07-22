@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ilionx | Meeting Transcription Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .ilionx-gradient {
+            background: linear-gradient(135deg, #c41e3a 0%, #e63946 100%);
+        }
+        .ilionx-accent {
+            background-color: #c41e3a;
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .transcription-text {
+            line-height: 1.8;
+        }
+        .action-item {
+            transition: all 0.3s ease;
+        }
+        .action-item:hover {
+            transform: translateX(5px);
+        }
+        .ilionx-red {
+            color: #c41e3a;
+        }
+        .ilionx-red-bg {
+            background-color: #c41e3a;
+        }
+        .ilionx-dark-red {
+            color: #a01830;
+        }
+        .ilionx-dark-red-bg {
+            background-color: #a01830;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="ilionx-gradient text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <img src="/temp/logo.png" alt="ilionx logo" class="h-10 w-auto">
+                    <span class="ml-3 text-xl font-bold">Meeting Transcription</span>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/" class="px-3 py-2 rounded-md text-sm font-medium bg-white/20 transition">Record</a>
+                    <a href="/dashboard" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/20 transition">Dashboard</a>
+                    <a href="/history" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/20 transition">History</a>
+                    <a href="/participants" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/20 transition">Participants</a>
+                    <a href="/about" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/20 transition">About</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="ilionx-dark-red-bg text-white py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-sm">ilionx | eenvoud brengen in een complexe wereld | Last updated: {{ current_time }}</p>
+        </div>
+    </footer>
+
+    <script>
+        // Auto-refresh functionality
+        function autoRefresh() {
+            fetch('/api/refresh')
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error refreshing:', error));
+        }
+
+        // Refresh every 30 seconds
+        setInterval(autoRefresh, 30000);
+    </script>
+</body>
+</html>
