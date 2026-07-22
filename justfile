@@ -31,7 +31,7 @@ sync: env
 
 # Backend HTTP API (uvicorn)
 api: env
-    cd backend && uv run uvicorn app.main:app --reload --host 127.0.0.1 --port {{ backend_port }}
+    cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port {{ backend_port }}
 
 # Backend processing worker
 worker: env
@@ -42,9 +42,9 @@ backend: env
     #!/usr/bin/env bash
     set -euo pipefail
     trap 'kill 0' EXIT INT TERM
-    echo "backend API  → http://127.0.0.1:{{ backend_port }}/docs"
+    echo "backend API  → http://0.0.0.0:{{ backend_port }}/docs"
     echo "worker       → polling queue"
-    (cd backend && uv run uvicorn app.main:app --reload --host 127.0.0.1 --port {{ backend_port }}) &
+    (cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port {{ backend_port }}) &
     (cd backend && uv run python -m app.worker) &
     wait
 
@@ -55,8 +55,8 @@ frontend: env
     export BACKEND_API_URL="${BACKEND_API_URL:-http://localhost:{{ backend_port }}}"
     export RECORDING_APP_URL="${RECORDING_APP_URL:-http://localhost:{{ jabra_port }}}"
     export PORT="{{ frontend_port }}"
-    export HOST="${HOST:-127.0.0.1}"
-    echo "frontend     → http://127.0.0.1:{{ frontend_port }}"
+    export HOST="${HOST:-0.0.0.0}"
+    echo "frontend     → http://0.0.0.0:{{ frontend_port }}"
     cd frontend && uv run python app.py
 
 # Pi / Jabra recorder (pi-client)
@@ -65,8 +65,8 @@ jabra: env
     set -euo pipefail
     export BACKEND_URL="${BACKEND_URL:-http://localhost:{{ backend_port }}/recordings}"
     export PORT="{{ jabra_port }}"
-    export HOST="${HOST:-127.0.0.1}"
-    echo "jabra        → http://127.0.0.1:{{ jabra_port }}"
+    export HOST="${HOST:-0.0.0.0}"
+    echo "jabra        → http://0.0.0.0:{{ jabra_port }}"
     cd pi-client && uv run app.py
 
 alias pi := jabra
@@ -79,14 +79,14 @@ all: env
     export BACKEND_API_URL="${BACKEND_API_URL:-http://localhost:{{ backend_port }}}"
     export RECORDING_APP_URL="${RECORDING_APP_URL:-http://localhost:{{ jabra_port }}}"
     export BACKEND_URL="${BACKEND_URL:-http://localhost:{{ backend_port }}/recordings}"
-    echo "backend API  → http://127.0.0.1:{{ backend_port }}/docs"
-    echo "frontend     → http://127.0.0.1:{{ frontend_port }}"
-    echo "jabra        → http://127.0.0.1:{{ jabra_port }}"
+    echo "backend API  → http://0.0.0.0:{{ backend_port }}/docs"
+    echo "frontend     → http://0.0.0.0:{{ frontend_port }}"
+    echo "jabra        → http://0.0.0.0:{{ jabra_port }}"
     echo "Ctrl-C stops all"
-    (cd backend && uv run uvicorn app.main:app --reload --host 127.0.0.1 --port {{ backend_port }}) &
+    (cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port {{ backend_port }}) &
     (cd backend && uv run python -m app.worker) &
-    (cd frontend && HOST=127.0.0.1 PORT={{ frontend_port }} BACKEND_API_URL="$BACKEND_API_URL" RECORDING_APP_URL="$RECORDING_APP_URL" uv run python app.py) &
-    (cd pi-client && HOST=127.0.0.1 PORT={{ jabra_port }} BACKEND_URL="$BACKEND_URL" uv run app.py) &
+    (cd frontend && HOST=0.0.0.0 PORT={{ frontend_port }} BACKEND_API_URL="$BACKEND_API_URL" RECORDING_APP_URL="$RECORDING_APP_URL" uv run python app.py) &
+    (cd pi-client && HOST=0.0.0.0 PORT={{ jabra_port }} BACKEND_URL="$BACKEND_URL" uv run app.py) &
     wait
 
 # Smoke: upload sample fixture to the running backend
